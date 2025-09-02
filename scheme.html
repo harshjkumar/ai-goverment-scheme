@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Government Scheme Advisor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(170deg, #F3F4F6, #E5E7EB);
+        }
+        .chat-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 75%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            animation: pop-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        }
+        @keyframes pop-in {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .chat-bubble-user {
+            background-color: #2563eb;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-bubble-ai {
+            background-color: #ffffff;
+            color: #1f2937;
+            border: 1px solid #E5E7EB;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-container {
+            height: calc(100vh - 170px);
+        }
+        .spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border-left-color: #2563eb;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .mic-listening svg {
+            color: #EF4444;
+        }
+        .mic-listening::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            background-color: #EF4444;
+            animation: pulse-red 1.5s infinite;
+            z-index: -1;
+        }
+        @keyframes pulse-red {
+            0% { transform: scale(0.7); opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .lang-switch button {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+        }
+        .lang-switch button.active {
+            background-color: #2563eb;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .lang-switch button:not(.active) {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+        .source-link {
+            display: inline-block;
+            background-color: #e0e7ff;
+            color: #3730a3;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin: 4px 4px 0 0;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .source-link:hover {
+            background-color: #c7d2fe;
+            color: #1e1b4b;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="flex flex-col h-screen max-w-3xl mx-auto bg-white/50 backdrop-blur-xl border border-gray-200/80 shadow-2xl rounded-2xl overflow-hidden my-4">
+        <!-- Header -->
+        <header class="p-4 flex items-center justify-between border-b border-gray-200/80">
+            <div class="flex items-center">
+                <svg class="h-10 w-10 text-blue-800" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                    <path fill="currentColor" d="M256 512a256 256 0 1 0 0-512 256 256 0 1 0 0 512zm0-384a128 128 0 1 1 0 256 128 128 0 1 1 0-256zm0-64a192 192 0 1 0 0 384 192 192 0 1 0 0-384zM256 96a16 16 0 1 1 0 32 16 16 0 1 1 0-32zm0 304a16 16 0 1 1 0-32 16 16 0 1 1 0 32zM416 256a16 16 0 1 1-32 0 16 16 0 1 1 32 0zM128 256a16 16 0 1 1-32 0 16 16 0 1 1 32 0zm241.9-150.1L333.3 142.5a16 16 0 0 1-22.6-22.6l36.6-36.6a16 16 0 0 1 22.6 22.6zm-171.8 0a16 16 0 0 1 22.6-22.6l36.6 36.6a16 16 0 0 1-22.6 22.6L168.1 105.9zm0 299.8l36.6-36.6a16 16 0 1 1 22.6 22.6l-36.6 36.6a16 16 0 0 1-22.6-22.6zm171.8 0a16 16 0 1 1-22.6 22.6l-36.6-36.6a16 16 0 1 1 22.6-22.6l36.6 36.6zM448 240a16 16 0 1 1 0 32H64a16 16 0 1 1 0-32h384zM240 64a16 16 0 1 1 32 0v384a16 16 0 1 1-32 0V64z"/>
+                </svg>
+                <div class="ml-4">
+                    <h1 id="app-title" class="text-lg font-bold text-gray-800">AI Government Scheme Advisor</h1>
+                    <p id="app-subtitle" class="text-sm text-gray-500">Your guide to public welfare schemes in India</p>
+                </div>
+            </div>
+            <div class="lang-switch flex items-center space-x-2">
+                <button id="lang-en" class="active">EN</button>
+                <button id="lang-hi">HI</button>
+            </div>
+        </header>
+
+        <!-- Chat Container -->
+        <main id="chat-container" class="flex-1 p-6 overflow-y-auto chat-container">
+            <div id="chatbox" class="space-y-6">
+                <!-- Chat messages will be populated by JS -->
+            </div>
+        </main>
+        
+        <!-- Input Area -->
+        <footer class="p-4 bg-white/60 backdrop-blur-xl border-t border-gray-200/80">
+            <div class="flex items-center bg-gray-100 rounded-full p-2">
+                <input type="text" id="userInput" placeholder="Type or press the mic to talk..." class="flex-1 px-4 py-2 bg-transparent focus-outline-none text-gray-800">
+                <button id="micBtn" title="Ask with your voice" class="relative ml-2 p-3 rounded-full hover:bg-gray-200 transition-colors duration-300 focus:outline-none z-10">
+                    <svg class="h-6 w-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 016 0v8.25a3 3 0 01-3 3z" />
+                    </svg>
+                </button>
+                <button id="sendBtn" class="ml-2 bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 rounded-full transition-colors duration-300 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                        <path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.949a.75.75 0 00.95.826L11.25 9.25v1.5L4.643 11.98a.75.75 0 00-.95.826l-1.414 4.949a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z" />
+                    </svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // --- BILINGUAL DATA & TRANSLATIONS ---
+        let schemes = {}; // This will be populated from the JSON file
+
+        const translations = {
+            en: {
+                title: "AI Government Scheme Advisor",
+                subtitle: "Your guide to public welfare schemes in India",
+                placeholder: "Type or press the mic to talk...",
+                welcome: "Namaste! How can I help you today? Tell me about your situation, and I'll find relevant government schemes for you.",
+                advisor: "Advisor",
+                thinking: "Thinking...",
+                searchingWeb: "Couldn't find a direct match. Searching the web for the latest information...",
+                micError: "Sorry, there was a voice recognition error. Please try again.",
+                apiError: "Sorry, I'm having trouble connecting to my knowledge base. Please try again in a moment.",
+                apiNoResponse: "Sorry, I couldn't generate a response. There might be an issue with the information I received.",
+                sources: "Sources:"
+            },
+            hi: {
+                title: "एआई सरकारी योजना सलाहकार",
+                subtitle: "भारत में सार्वजनिक कल्याण योजनाओं के लिए आपका गाइड",
+                placeholder: "टाइप करें या बोलने के लिए माइक दबाएं...",
+                welcome: "नमस्ते! आज मैं आपकी कैसे मदद कर सकता हूँ? मुझे अपनी स्थिति के बारे में बताएं, और मैं आपके लिए प्रासंगिक सरकारी योजनाएं ढूंढूंगा।",
+                advisor: "सलाहकार",
+                thinking: "सोच रहा हूँ...",
+                searchingWeb: "कोई सीधा मिलान नहीं मिला। नवीनतम जानकारी के लिए वेब पर खोज कर रहा हूँ...",
+                micError: "क्षमा करें, वॉइस पहचानने में कोई त्रुटि हुई। कृपया फिर से प्रयास करें।",
+                apiError: "क्षमा करें, मुझे अपने नॉलेज बेस से जुड़ने में समस्या आ रही है। कृपया कुछ देर बाद फिर से प्रयास करें।",
+                apiNoResponse: "क्षमा करें, मैं प्रतिक्रिया उत्पन्न नहीं कर सका। मुझे मिली जानकारी में कोई समस्या हो सकती है।",
+                sources: "स्रोत:"
+            }
+        };
+
+        // --- STATE & UI ELEMENTS ---
+        let currentLanguage = 'en';
+        const chatbox = document.getElementById('chatbox');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const micBtn = document.getElementById('micBtn');
+        const chatContainer = document.getElementById('chat-container');
+        const langEnBtn = document.getElementById('lang-en');
+        const langHiBtn = document.getElementById('lang-hi');
+
+        // --- INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('schemes.json');
+                if (!response.ok) throw new Error('Network response was not ok.');
+                schemes = await response.json();
+                setLanguage('en');
+            } catch (error) {
+                console.error('Failed to load scheme data:', error);
+                const chatbox = document.getElementById('chatbox');
+                chatbox.innerHTML = `<div class="p-4 text-center text-red-600">Failed to load critical knowledge base. Please refresh the page.</div>`;
+            }
+        });
+
+        // --- EVENT LISTENERS ---
+        sendBtn.addEventListener('click', handleUserQuery);
+        userInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') handleUserQuery();
+        });
+        langEnBtn.addEventListener('click', () => setLanguage('en'));
+        langHiBtn.addEventListener('click', () => setLanguage('hi'));
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            const t = translations[lang];
+            document.getElementById('app-title').textContent = t.title;
+            document.getElementById('app-subtitle').textContent = t.subtitle;
+            userInput.placeholder = t.placeholder;
+            langEnBtn.classList.toggle('active', lang === 'en');
+            langHiBtn.classList.toggle('active', lang === 'hi');
+            if (recognition) {
+                recognition.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
+            }
+            chatbox.innerHTML = '';
+            displayMessage(t.welcome, 'ai');
+        }
+
+        // --- Voice Recognition Logic ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        let isListening = false;
+        let finalTranscript = '';
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            micBtn.addEventListener('click', toggleListening);
+            recognition.onstart = () => { isListening = true; micBtn.classList.add('mic-listening'); finalTranscript = userInput.value; };
+            recognition.onend = () => { isListening = false; micBtn.classList.remove('mic-listening'); if (userInput.value.trim()) { handleUserQuery(); } };
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) { finalTranscript += event.results[i][0].transcript; } else { interimTranscript += event.results[i][0].transcript; }
+                }
+                userInput.value = finalTranscript + interimTranscript;
+            };
+            recognition.onerror = (event) => { console.error("Speech Recognition Error:", event.error); displayMessage(translations[currentLanguage].micError, 'ai'); };
+        } else { micBtn.style.display = 'none'; }
+        function toggleListening() { if (isListening) { recognition.stop(); } else { recognition.start(); } }
+
+        // --- AI & RAG LOGIC ---
+        async function handleUserQuery() {
+            const query = userInput.value.trim();
+            if (!query) return;
+            displayMessage(query, 'user');
+            userInput.value = '';
+
+            const relevantSchemes = retrieveRelevantSchemes(query, 3);
+
+            if (relevantSchemes.length > 0) {
+                displayLoadingIndicator(false);
+                try {
+                    const { text } = await generateResponse(query, relevantSchemes, false);
+                    hideLoadingIndicator();
+                    displayMessage(text, 'ai');
+                } catch (error) {
+                    console.error("API Call failed (local context):", error);
+                    hideLoadingIndicator();
+                    displayMessage(translations[currentLanguage].apiError, 'ai');
+                }
+            } else {
+                displayLoadingIndicator(true);
+                try {
+                    const { text, sources } = await generateResponse(query, [], true);
+                    hideLoadingIndicator();
+                    displayMessage(text, 'ai', sources);
+                } catch (error) {
+                    console.error("API Call failed (web search):", error);
+                    hideLoadingIndicator();
+                    displayMessage(translations[currentLanguage].apiError, 'ai');
+                }
+            }
+        }
+
+        function retrieveRelevantSchemes(query, topN = 3) {
+            if (!schemes[currentLanguage]) return [];
+            const queryWords = query.toLowerCase().split(/\s+/);
+            const currentSchemes = schemes[currentLanguage];
+            const scoredSchemes = currentSchemes.map(scheme => {
+                const schemeText = `${scheme.name} ${scheme.category} ${scheme.keywords}`.toLowerCase();
+                let score = 0;
+                queryWords.forEach(word => {
+                    if (schemeText.includes(word)) { score++; }
+                });
+                return { ...scheme, score };
+            });
+            scoredSchemes.sort((a, b) => b.score - a.score);
+            return scoredSchemes.slice(0, topN).filter(scheme => scheme.score > 0);
+        }
+
+        async function generateResponse(query, contextSchemes, useWebSearch = false) {
+            const apiKey = "AIzaSyBr5w9J5NI0ci9FMGMzO9pAZprkMMLksc8";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const payload = { contents: [{ parts: [{ text: query }] }] };
+
+            if (useWebSearch) {
+                payload.tools = [{ "google_search": {} }];
+                payload.systemInstruction = {
+                    parts: [{ text: currentLanguage === 'hi'
+                        ? `आप एक भारतीय सरकारी योजना सलाहकार हैं। उपयोगकर्ता के प्रश्न का उत्तर देने के लिए Google खोज परिणामों का उपयोग करें। अपनी प्रतिक्रिया मैत्रीपूर्ण और सहायक लहजे में दें। अपनी प्रतिक्रिया की शुरुआत "नमस्ते!" से करें और प्रतिक्रिया हिंदी में होनी चाहिए।`
+                        : `You are an Indian Government Scheme Advisor. Use the Google Search results to answer the user's query. Provide the response in a friendly, helpful tone. Start your response with "Namaste!".`
+                    }]
+                };
+            } else {
+                 const systemPrompt = currentLanguage === 'hi'
+                    ? `आप भारत सरकार योजना सलाहकार के लिए एक सहायक और दयालु एआई सहायक हैं। आपका लक्ष्य नागरिकों को सार्वजनिक कल्याण योजनाओं को समझने में मदद करना है।
+- दिए गए "योजना की जानकारी" के आधार पर ही उपयोगकर्ता के प्रश्न का उत्तर दें। किसी भी बाहरी ज्ञान का उपयोग न करें।
+- यदि दी गई जानकारी उत्तर देने के लिए पर्याप्त नहीं है, तो विनम्रतापूर्वक कहें "मेरे ज्ञानकोष में इसके बारे में पर्याप्त जानकारी नहीं है।"
+- अपनी प्रतिक्रिया को स्पष्ट रूप से प्रारूपित करें। यदि उपयुक्त हो तो लाभ और पात्रता के लिए बुलेट बिंदुओं का उपयोग करें।
+- अपने लहजे में मैत्रीपूर्ण और उत्साहजनक रहें। अपनी प्रतिक्रिया "नमस्ते!" से शुरू करें।`
+                    : `You are a helpful and compassionate AI assistant for the Indian Government Scheme Advisor. Your goal is to help citizens understand public welfare schemes.
+- Answer the user's query STRICTLY based on the provided "Scheme Information" context. Do not use any external knowledge.
+- If the provided information is not sufficient to answer, politely say "I do not have enough information about that in my knowledge base."
+- Format your response clearly. Use bullet points for benefits and eligibility if appropriate.
+- Be friendly and encouraging in your tone. Start your response with "Namaste!".`;
+                
+                let contextText = "No relevant schemes found in the knowledge base.";
+                if (contextSchemes.length > 0) {
+                    contextText = contextSchemes.map(s => `Scheme Name: ${s.name}\nDescription: ${s.description}\nBenefits: ${s.benefits}\nEligibility: ${s.eligibility}`).join('\n---\n');
+                }
+                const userPrompt = `User Query: "${query}"\n\nScheme Information:\n${contextText}`;
+                payload.contents = [{ parts: [{ text: userPrompt }] }];
+                payload.systemInstruction = { parts: [{ text: systemPrompt }] };
+            }
+            
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) { throw new Error(`API call failed with status: ${response.status}`); }
+            const result = await response.json();
+            const candidate = result.candidates?.[0];
+
+            let text = translations[currentLanguage].apiNoResponse;
+            let sources = [];
+
+            if (candidate && candidate.content?.parts?.[0]?.text) {
+                text = candidate.content.parts[0].text;
+            }
+
+            if (useWebSearch && candidate?.groundingMetadata?.groundingAttributions) {
+                sources = candidate.groundingMetadata.groundingAttributions
+                    .map(attr => ({ uri: attr.web?.uri, title: attr.web?.title }))
+                    .filter(source => source.uri && source.title);
+            }
+            
+            return { text, sources };
+        }
+
+        // --- UI HELPER FUNCTIONS ---
+        function displayMessage(message, sender, sources = []) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble ${sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`;
+
+            if (sender === 'ai') {
+                const title = document.createElement('p');
+                title.className = 'font-bold mb-1 text-gray-700';
+                title.textContent = translations[currentLanguage].advisor;
+                bubble.appendChild(title);
+            }
+
+            const text = document.createElement('p');
+            text.innerText = message;
+            bubble.appendChild(text);
+
+            if (sender === 'ai' && sources.length > 0) {
+                const sourcesContainer = document.createElement('div');
+                sourcesContainer.className = 'mt-3 pt-2 border-t border-gray-200';
+                
+                const sourcesTitle = document.createElement('p');
+                sourcesTitle.className = 'text-xs font-semibold text-gray-600 mb-1';
+                sourcesTitle.textContent = translations[currentLanguage].sources;
+                sourcesContainer.appendChild(sourcesTitle);
+
+                sources.forEach(source => {
+                    const link = document.createElement('a');
+                    link.href = source.uri;
+                    link.textContent = source.title;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    link.className = 'source-link';
+                    sourcesContainer.appendChild(link);
+                });
+                bubble.appendChild(sourcesContainer);
+            }
+
+            wrapper.appendChild(bubble);
+            chatbox.appendChild(wrapper);
+            scrollToBottom();
+        }
+        
+        let loadingElement = null;
+        function displayLoadingIndicator(isSearchingWeb) {
+            loadingElement = document.createElement('div');
+            loadingElement.className = 'flex justify-start';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble chat-bubble-ai flex items-center space-x-2';
+            
+            const spinner = document.createElement('div');
+            spinner.className = 'spinner';
+            
+            const text = document.createElement('p');
+            text.className = 'text-gray-600';
+            text.textContent = isSearchingWeb 
+                ? translations[currentLanguage].searchingWeb
+                : translations[currentLanguage].thinking;
+            
+            bubble.appendChild(spinner);
+            bubble.appendChild(text);
+            loadingElement.appendChild(bubble);
+            
+            chatbox.appendChild(loadingElement);
+            scrollToBottom();
+        }
+
+        function hideLoadingIndicator() { 
+            if(loadingElement && loadingElement.parentNode === chatbox) { 
+                chatbox.removeChild(loadingElement); 
+            }
+            loadingElement = null; 
+        }
+        
+        function scrollToBottom() { 
+            chatContainer.scrollTop = chatContainer.scrollHeight; 
+        }
+
+    </script>
+</body>
+</html>
+
